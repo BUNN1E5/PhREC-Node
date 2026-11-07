@@ -66,7 +66,7 @@ void loop() {
   //sensor.update();
   motor.loopFOC();
 
-  motor.move(5.0);
+  motor.move(10.0);
 }
 
 #ifdef __cplusplus

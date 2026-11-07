@@ -4,7 +4,7 @@
 class MT6701_I2C : public Sensor{
 public:
     MT6701_I2C(int sensor_id, int group_id);
-    SensorStreamData getData() override;
+    SensorDataResponse getData() override;
     int id;
     int group_id;
 };
@@ -27,7 +27,7 @@ MT6701_I2C::MT6701_I2C(int sensor_id, int group_id) {
     Wire.begin();
 }
 
-SensorStreamData MT6701_I2C::getData() {
+SensorDataResponse MT6701_I2C::getData() {
     Wire.beginTransmission(slave_id);
     Wire.endTransmission(false);
 
@@ -36,9 +36,9 @@ SensorStreamData MT6701_I2C::getData() {
     Wire.requestFrom(slave_id, angle_data_registers[1]);
     byte b = Wire.read();
 
-    SensorStreamData data;
-    data.message_id = -13; // Defined in messages.md
-    data.sensor_id = this->id;
-    data.sensor_data = (a << 6) | (b >> 2); // Combine the two bytes of angle data
-    return data;
+    Message msg;
+    msg.sensorDataResponse.message_id = -13; // Defined in messages.md
+    msg.sensorDataResponse.sensor_data = (a << 6) | (b >> 2); // Combine the two bytes of angle data
+    msg.sensorDataResponse.crc8 = crc8(msg.body.data, sizeof(msg.body));
+    return msg.sensorDataResponse;
 }

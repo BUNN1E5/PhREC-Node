@@ -5,7 +5,7 @@
 class MT6701_SPI : public Sensor{
 public:
     MT6701_SPI(PinName NSS, int sensor_id, int group_id);
-    SensorStreamData getData() override;
+    SensorDataResponse getData() override;
     int id;
     int group_id;
 };
@@ -32,7 +32,7 @@ MT6701_SPI::MT6701_SPI(PinName NSS, int sensor_id, int group_id) {
     SPI.setDataMode(SPI_MODE2);
 }
 
-SensorStreamData MT6701_SPI::getData() {
+SensorDataResponse MT6701_SPI::getData() {
     SPI.beginTransaction(spiSettings);
     digitalWrite(nss_pin, LOW);
 
@@ -51,11 +51,11 @@ SensorStreamData MT6701_SPI::getData() {
     //We only want 6 bits of b
     uint32_t sensor_data = (a << 6) | (b >> 2);
 
-    SensorDataResponse data;
-    data.message_id = -13; // Defined in messages.md
-    //data.sensor_id = this->id;
-    data.sensor_data = sensor_data; // data.sensor_data is 18 bits the crc is truncated
-    
+    Message msg;
+    msg.sensorDataResponse.message_id = -13; // Defined in messages.md
+    msg.sensorDataResponse.sensor_data = (a << 6) | (b >> 2); // Combine the two bytes of angle data
+    msg.sensorDataResponse.crc8 = crc8(msg.body.data, sizeof(msg.body));
+
     digitalWrite(nss_pin, HIGH);
     SPI.endTransaction();
 
@@ -63,5 +63,5 @@ SensorStreamData MT6701_SPI::getData() {
     delayMicroseconds(20);
     #endif
 
-    return data;
+    return msg.sensorDataResponse;
 }

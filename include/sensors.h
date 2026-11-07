@@ -1,5 +1,6 @@
 #include "stdint.h"
 #include "messages.h"
+#include "utils/crc.h"
 
 //This is currently a C++ class, if we convert the rest of the
 //project to C we can convert this to a C struct with function pointers
@@ -12,9 +13,9 @@
 
 class Sensor{
 public:
-    static uint8_t next_id;
-    static Sensor* sensors[MAX_SENSORS];
-    static uint8_t sensor_count;
+    inline static uint8_t next_id = 0;
+    inline static Sensor* sensors[MAX_SENSORS];
+    inline static uint8_t sensor_count = 0;
 
     Sensor() : id(next_id++) {
         if (sensor_count < MAX_SENSORS) {
@@ -33,8 +34,4 @@ public:
     
 private:
 };
-
-uint8_t Sensor::next_id = 0;
-Sensor* Sensor::sensors[MAX_SENSORS];
-uint8_t Sensor::sensor_count = 0;
 
